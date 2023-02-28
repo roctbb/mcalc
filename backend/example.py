@@ -34,20 +34,20 @@ example_calc = {
         },
         {
             "title": "Альбумин",
-            "description": "От 1 до 6",
+            "description": "От 0.1 до 0.6",
             "is_required": True,
             "code": "albumin",
             "limits": [
                 {
                     "type": "min",
-                    "value": 1
+                    "value": 0.1
                 },
                 {
                     "type": "max",
-                    "value": 6
+                    "value": 0.6
                 }
             ],
-            "type": "int",
+            "type": "float",
             "unit": "г/л"
         },
         {
@@ -84,17 +84,17 @@ example_calc = {
         },
         {
             "title": "Гемоглобин",
-            "description": "От 5 до 16.5",
+            "description": "От 0.5 до 1.65",
             "is_required": True,
             "code": "hemoglobin",
             "limits": [
                 {
                     "type": "min",
-                    "value": 5
+                    "value": 0.5
                 },
                 {
                     "type": "max",
-                    "value": 16.5
+                    "value": 1.65
                 }
             ],
             "type": "float",

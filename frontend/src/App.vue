@@ -1,6 +1,67 @@
 <script lang="ts">
 import {defineComponent} from 'vue';
 
+type Limit = {
+    type: string
+    value: number
+}
+
+type Error = {
+    code: string,
+    text: string
+}
+
+type Option = {
+    title: string,
+    value: any
+}
+
+type Field = {
+    title: string
+    description: string
+    code: string
+    type: string
+    unit: string
+    is_required: boolean
+    limits: Array<Limit>
+    options: Array<Option>
+}
+
+type InfoBlock = {
+    title: string
+    text: string
+}
+
+type Calc = {
+    title: string
+    info: Array<InfoBlock>
+    fields: Array<Field>
+}
+
+type Result = {
+    unit: string
+    value: any
+    code: string
+    title: string
+}
+
+type CalculateResponse =  {
+    state: string
+    errors: Array<Error>
+    results: Array<Result>
+}
+
+type State = {
+    fields: Array<Field>,
+    title: string,
+    info: Array<InfoBlock>
+    fields_limits: Map<string, any>,
+    data: any,
+    results: Array<Result>,
+    errors: Map<string, string>
+}
+
+
 export default defineComponent({
     methods: {
         calculate: function () {
@@ -15,14 +76,13 @@ export default defineComponent({
                 body: JSON.stringify(this.data)
             }).then((response) => response.json()).then(this.process_calculate_answer)
         },
-        process_calculate_answer: function (data) {
-            this.errors = {}
+        process_calculate_answer: function (data: CalculateResponse) {
+            this.errors = new Map()
             this.results = []
 
             if (data.state == 'error') {
-                console.log(data)
-                data.errors.forEach(error => {
-                    this.errors[error.code] = error.text
+                data.errors.forEach((error) => {
+                    this.errors.set(error.code, error.text)
                 })
 
                 console.log(this.errors)
@@ -30,14 +90,14 @@ export default defineComponent({
                 this.results = data.results
             }
         },
-        init: function (data) {
-            this.fields = data['fields']
+        init: function (data: Calc) {
+            this.fields = data.fields
 
-            this.fields.forEach(field => {
+            this.fields.forEach((field: Field) => {
                 if (field.limits) {
-                    this.fields_limits[field.code] = {}
-                    field.limits.forEach((limit) => {
-                        this.fields_limits[field.code][limit.type] = limit.value
+                    this.fields_limits.set(field.code, {})
+                    field.limits.forEach((limit: Limit) => {
+                        this.fields_limits.get(field.code)[limit.type] = limit.value
                     })
                 }
 
@@ -46,19 +106,19 @@ export default defineComponent({
                 }
             })
 
-            this.title = data['title']
-            this.info = data['info']
+            this.title = data.title
+            this.info = data.info
         }
     },
-    data() {
+    data() : State {
         return {
             fields: [],
             title: "",
-            info: "",
-            fields_limits: {},
+            info: [],
+            fields_limits: new Map(),
             data: {},
             results: [],
-            errors: {}
+            errors: new Map()
         }
     },
     mounted() {
@@ -89,19 +149,19 @@ export default defineComponent({
                             <div class="field has-addons">
 
                                 <div class="control is-expanded">
-                                    <input :class="{'is-danger': errors[field.code]}" v-if="field.type === 'string'"
+                                    <input :class="{'is-danger': errors.has(field.code)}" v-if="field.type === 'string'"
                                            class="input" type="text"
                                            v-model="data[field.code]">
-                                    <input :class="{'is-danger': errors[field.code]}" v-if="field.type === 'int'"
+                                    <input :class="{'is-danger': errors.has(field.code)}" v-if="field.type === 'int'"
                                            class="input" type="number" step="1"
-                                           v-model="data[field.code]" :min="fields_limits[field.code].min"
-                                           :max="fields_limits[field.code].max">
-                                    <input :class="{'is-danger': errors[field.code]}" v-if="field.type === 'float'"
+                                           v-model="data[field.code]" :min="fields_limits.get(field.code).min"
+                                           :max="fields_limits.get(field.code).max">
+                                    <input :class="{'is-danger': errors.has(field.code)}" v-if="field.type === 'float'"
                                            class="input" type="number" step="0.01"
-                                           v-model="data[field.code]" :min="fields_limits[field.code].min"
-                                           :max="fields_limits[field.code].max">
+                                           v-model="data[field.code]" :min="fields_limits.get(field.code).min"
+                                           :max="fields_limits.get(field.code).max">
 
-                                    <div :class="{'is-danger': errors[field.code]}" class="select"
+                                    <div :class="{'is-danger': errors.has(field.code)}" class="select"
                                          v-if="field.type === 'radio'">
                                         <select v-model="data[field.code]">
                                             <option v-for="option in field.options" :value="option.value">{{
@@ -125,7 +185,7 @@ export default defineComponent({
                                 field.description
                             }} </span></p>
 
-                        <p class="help is-danger" v-if="errors[field.code]">{{ errors[field.code] }}</p>
+                        <p class="help is-danger" v-if="errors.has(field.code)">{{ errors.get(field.code) }}</p>
                     </div>
 
                     <div class="field is-grouped">

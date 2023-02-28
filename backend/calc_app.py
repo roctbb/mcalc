@@ -32,6 +32,9 @@ def get_result():
 
     for output in example_calc['results']:
         calculator = import_code(output['script'], 'calculator')
+
+        print(data)
+
         result = calculator.calculate(data)
 
         if "unit" in output:
