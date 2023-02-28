@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from flask import Flask, jsonify, request, make_response
 from config import *
 from validators import get_errors
@@ -35,7 +37,7 @@ def get_result():
 
         print(data)
 
-        result = calculator.calculate(data)
+        result = calculator.calculate(deepcopy(data))
 
         if "unit" in output:
             if output['unit'] == '%':
