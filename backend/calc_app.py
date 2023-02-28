@@ -53,5 +53,5 @@ def get_result():
 
     return jsonify({'state': 'success', 'results': results})
 
-
-app.run(HOST, PORT, debug=DEBUG)
+if __name__ == "__main__":
+    app.run(HOST, PORT, debug=DEBUG)
