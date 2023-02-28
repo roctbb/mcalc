@@ -1,4 +1,3 @@
-npm install
 sudo pip3 install -r requirements.txt
 sudo cp mcalc.conf /etc/supervisor/conf.d/
 sudo cp mcalc_nginx.conf /etc/nginx/sites-enabled/
