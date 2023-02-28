@@ -14,7 +14,7 @@ def get_errors(data, fields):
 
         # required
         if field['is_required'] and code not in data:
-            errors.append(make_error(code, f"{title} is required"))
+            errors.append(make_error(code, f"Заполните поле {title}"))
             continue
 
         if not field['is_required'] and code not in data:
@@ -25,14 +25,14 @@ def get_errors(data, fields):
             try:
                 data[code] = int(data[code])
             except:
-                errors.append(make_error(code, f"{title} should be interger"))
+                errors.append(make_error(code, f"Значение {title} должно быть целым числом"))
                 continue
 
         elif field["type"] == "float":
             try:
                 data[code] = float(data[code])
             except:
-                errors.append(make_error(code, f"{title} should be float"))
+                errors.append(make_error(code, f"Значение {title} должно быть числом"))
                 continue
 
         elif field["type"] == "radio" or field["type"] == "select":
@@ -40,7 +40,7 @@ def get_errors(data, fields):
             options = list(map(lambda variant: variant['value'], field['options']))
 
             if data[code] not in options:
-                errors.append(make_error(code, f"Incorrect {title} value"))
+                errors.append(make_error(code, f"Недопустимое значение {title}"))
                 continue
 
         value = data[code]
@@ -50,11 +50,11 @@ def get_errors(data, fields):
             for rule in field["limits"]:
                 if rule["type"] == "max":
                     if value > rule['value']:
-                        errors.append(make_error(code, f"{title} should be less than {rule['value']}"))
+                        errors.append(make_error(code, f"Значение {title} должно быть меньше {rule['value']}"))
                         continue
                 if rule["type"] == "min":
                     if value < rule['value']:
-                        errors.append(make_error(code, f"{title} should be greater than {rule['value']}"))
+                        errors.append(make_error(code, f"Значение {title} должно быть больше {rule['value']}"))
                         continue
 
     return errors
