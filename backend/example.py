@@ -34,20 +34,20 @@ example_calc = {
         },
         {
             "title": "Альбумин",
-            "description": "От 0.1 до 0.6",
+            "description": "От 10 до 60",
             "is_required": True,
             "code": "albumin",
             "limits": [
                 {
                     "type": "min",
-                    "value": 0.1
+                    "value": 10
                 },
                 {
                     "type": "max",
-                    "value": 0.6
+                    "value": 60
                 }
             ],
-            "type": "float",
+            "type": "int",
             "unit": "г/л"
         },
         {
@@ -84,20 +84,20 @@ example_calc = {
         },
         {
             "title": "Гемоглобин",
-            "description": "От 0.5 до 1.65",
+            "description": "От 50 до 165",
             "is_required": True,
             "code": "hemoglobin",
             "limits": [
                 {
                     "type": "min",
-                    "value": 0.5
+                    "value": 50
                 },
                 {
                     "type": "max",
-                    "value": 1.65
+                    "value": 165
                 }
             ],
-            "type": "float",
+            "type": "int",
             "unit": "г/л"
         },
         {
@@ -149,8 +149,8 @@ example_calc = {
 def calculate(data):
     from math import exp
     
-    data['albumin'] = data['albumin'] * 10
-    data['hemoglobin'] = data['hemoglobin'] * 10
+    data['albumin'] = data['albumin'] / 10
+    data['hemoglobin'] = data['hemoglobin'] / 10
     
     stage4 = data['stage'] == 4
     So5 = 0.9372773
@@ -178,8 +178,8 @@ def calculate(data):
 def calculate(data):
     from math import exp
     
-    data['albumin'] = data['albumin'] * 10
-    data['hemoglobin'] = data['hemoglobin'] * 10
+    data['albumin'] = data['albumin'] / 10
+    data['hemoglobin'] = data['hemoglobin'] / 10
     
     stage4 = data['stage'] == 4
     stage3 = data['stage'] == 3
