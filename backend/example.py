@@ -51,17 +51,17 @@ example_calc = {
             "unit": "г/л"
         },
         {
-            "title": "Bulk",
+            "title": "Массивный объем опухоли (больше 7 см)",
             "is_required": True,
             "type": "radio",
             "code": "bulk",
             "options": [
                 {
-                    "title": "any bulk",
+                    "title": "Да",
                     "value": 1
                 },
                 {
-                    "title": "no bulk",
+                    "title": "Нет",
                     "value": 0
                 }
             ]
