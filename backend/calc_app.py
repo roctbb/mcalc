@@ -10,11 +10,13 @@ from models import *
 
 app = Flask(__name__)
 
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 db_string = "postgresql://{}:{}@{}:{}/{}".format(DB_LOGIN, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_string
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
 
-CORS(app)
+
 db.init_app(app)
 migrate = Migrate(app, db)
 
@@ -44,7 +46,7 @@ def get_calc(id):
 
 
 @app.route('/calc/<int:id>', methods=['POST'])
-def get_result():
+def get_result(id):
     data = request.json
 
     calc = Calc.query.filter_by(id=id).first_or_404()
@@ -62,7 +64,7 @@ def get_result():
 
     results = []
 
-    for output in example_calc['results']:
+    for output in payload['results']:
         calculator = import_code(output['script'], 'calculator')
 
         result = calculator.calculate(deepcopy(data))

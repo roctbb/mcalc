@@ -61,6 +61,7 @@ type CalculateResponse = {
 }
 
 type State = {
+    current_id: number,
     state: string,
     config: Config,
     fields: Array<Field>,
@@ -77,9 +78,9 @@ type State = {
 export default defineComponent({
     methods: {
         calculate: function () {
-            console.log(this.data)
-            let host = import.meta.env.VITE_HOST
-            fetch(host + '/calc', {
+            console.log("data", this.data, this.current_id)
+
+            fetch(this.config.host + '/calc/' + this.current_id, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -102,7 +103,18 @@ export default defineComponent({
                 this.results = data.results
             }
         },
+        clear: function () {
+            this.fields = []
+            this.title = ""
+            this.info = []
+            this.fields_limits = new Map()
+            this.data = {}
+            this.results = []
+            this.errors = new Map()
+        },
         load_calculator: function (data: Calc) {
+            this.clear()
+
             this.fields = data.fields
 
             this.fields.forEach((field: Field) => {
@@ -123,7 +135,8 @@ export default defineComponent({
             this.state = 'calc'
         },
         get_calculator: function (id: number) {
-            fetch(this.config.host + '/calc/' + id)
+            this.current_id = id
+            fetch(this.config.host + '/calc/' + this.current_id)
                 .then((response) => response.json())
                 .then(this.load_calculator);
         },
@@ -141,6 +154,7 @@ export default defineComponent({
     },
     data(): State {
         return {
+            current_id: -1,
             state: "list",
             config: {
                 host: import.meta.env.VITE_HOST
@@ -172,7 +186,9 @@ export default defineComponent({
                             Калькуляторы
                         </p>
                         <ul class="menu-list">
-                            <li v-for="calc_description in calculators"><a @click="get_calculator(calc_description.id)">{{ calc_description.title }}</a></li>
+                            <li v-for="calc_description in calculators"><a @click="get_calculator(calc_description.id)">{{
+                                    calc_description.title
+                                }}</a></li>
                         </ul>
                     </aside>
                 </div>
