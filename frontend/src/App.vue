@@ -6,6 +6,10 @@ type Limit = {
     value: number
 }
 
+type Config = {
+    host: string
+}
+
 type Error = {
     code: string,
     text: string
@@ -32,6 +36,11 @@ type InfoBlock = {
     text: string
 }
 
+type CalcDescription = {
+    title: string
+    id: number
+}
+
 type Calc = {
     title: string
     info: Array<InfoBlock>
@@ -45,20 +54,23 @@ type Result = {
     title: string
 }
 
-type CalculateResponse =  {
+type CalculateResponse = {
     state: string
     errors: Array<Error>
     results: Array<Result>
 }
 
 type State = {
+    state: string,
+    config: Config,
     fields: Array<Field>,
     title: string,
     info: Array<InfoBlock>
     fields_limits: Map<string, any>,
     data: any,
     results: Array<Result>,
-    errors: Map<string, string>
+    errors: Map<string, string>,
+    calculators: Array<CalcDescription>
 }
 
 
@@ -90,7 +102,7 @@ export default defineComponent({
                 this.results = data.results
             }
         },
-        init: function (data: Calc) {
+        load_calculator: function (data: Calc) {
             this.fields = data.fields
 
             this.fields.forEach((field: Field) => {
@@ -108,25 +120,43 @@ export default defineComponent({
 
             this.title = data.title
             this.info = data.info
+            this.state = 'calc'
+        },
+        get_calculator: function (id: number) {
+            fetch(this.config.host + '/calc/' + id)
+                .then((response) => response.json())
+                .then(this.load_calculator);
+        },
+        get_list: function () {
+            let self = this
+            fetch(this.config.host + '/calc')
+                .then((response) => response.json())
+                .then((data: Array<CalcDescription>) => {
+                    self.calculators = data
+                });
+        },
+        go_back: function () {
+            this.state = 'list'
         }
     },
-    data() : State {
+    data(): State {
         return {
+            state: "list",
+            config: {
+                host: import.meta.env.VITE_HOST
+            },
             fields: [],
             title: "",
             info: [],
             fields_limits: new Map(),
             data: {},
             results: [],
-            errors: new Map()
+            errors: new Map(),
+            calculators: []
         }
     },
     mounted() {
-        let host = import.meta.env.VITE_HOST
-
-        fetch(host + '/calc')
-            .then((response) => response.json())
-            .then(this.init);
+        this.get_list()
     }
 })
 
@@ -136,8 +166,18 @@ export default defineComponent({
     <div class="container mt-3">
         <div class="is-centered">
             <div class="column is-full">
-                <div class="box main-block">
-
+                <div v-if="state === 'list'">
+                    <aside class="menu">
+                        <p class="menu-label">
+                            Калькуляторы
+                        </p>
+                        <ul class="menu-list">
+                            <li v-for="calc_description in calculators"><a @click="get_calculator(calc_description.id)">{{ calc_description.title }}</a></li>
+                        </ul>
+                    </aside>
+                </div>
+                <div class="box main-block" v-if="state === 'calc'">
+                    <div class="mb-2"><a @click="go_back()">Назад</a></div>
                     <h1 class="title is-4">{{ title }}</h1>
 
                     <div class="field" v-for="field in fields">

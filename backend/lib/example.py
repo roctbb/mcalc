@@ -1,3 +1,5 @@
+import json
+
 example_calc = {
     "title": "Международный прогностический индекс лимфомы Ходжкина для поздних стадий",
     "info": [
@@ -200,3 +202,6 @@ def calculate(data):
     ]
 
 }
+
+if __name__ == "__main__":
+    print(json.dumps(example_calc))

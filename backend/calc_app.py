@@ -1,29 +1,59 @@
 from copy import deepcopy
 
-from flask import Flask, jsonify, request, make_response
+from flask import Flask, jsonify, request, make_response, abort
 from config import *
 from validators import get_errors
 from helpers import *
-from example import example_calc
 from flask_cors import CORS
+from flask_migrate import Migrate
+from models import *
 
 app = Flask(__name__)
+
+db_string = "postgresql://{}:{}@{}:{}/{}".format(DB_LOGIN, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_string
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {"pool_pre_ping": True}
+
 CORS(app)
+db.init_app(app)
+migrate = Migrate(app, db)
 
 
 @app.route('/calc', methods=['GET'])
-def get_calc():
+def get_calc_list():
+    calcs = Calc.query.all()
+
+    return jsonify([
+        {"id": calc.id, "title": calc.title} for calc in calcs
+    ])
+
+
+@app.route('/calc/<int:id>', methods=['GET'])
+def get_calc(id):
+    calc = Calc.query.filter_by(id=id).first_or_404()
+    payload = calc.payload
+
+    if not payload:
+        abort(404)
+
     return jsonify({
-        "fields": example_calc['fields'],
-        "title": example_calc['title'],
-        "info": example_calc['info']
+        "fields": payload['fields'],
+        "title": payload['title'],
+        "info": payload['info']
     })
 
 
-@app.route('/calc', methods=['POST'])
+@app.route('/calc/<int:id>', methods=['POST'])
 def get_result():
     data = request.json
-    fields = example_calc['fields']
+
+    calc = Calc.query.filter_by(id=id).first_or_404()
+    payload = calc.payload
+
+    if not payload:
+        abort(404)
+
+    fields = payload['fields']
 
     errors = get_errors(data, fields)
 
@@ -34,8 +64,6 @@ def get_result():
 
     for output in example_calc['results']:
         calculator = import_code(output['script'], 'calculator')
-
-        print(data)
 
         result = calculator.calculate(deepcopy(data))
 
@@ -54,6 +82,7 @@ def get_result():
         })
 
     return jsonify({'state': 'success', 'results': results})
+
 
 if __name__ == "__main__":
     app.run(HOST, PORT, debug=DEBUG)
